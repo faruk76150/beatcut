@@ -1,15 +1,6 @@
-beatcut
-Copyright (c) 2026 The beatcut authors
-
-The source code in this repository is licensed under the MIT License below.
-
-The video clips in examples/demo/ (*.mp4) and docs/demo.gif, which is made from
-them, are NOT covered by the MIT License. They are Faruk Tomruk's own footage,
-all rights reserved, and are included in the repository only so that the tool
-can be tried out. The demo music is separate: "Our expanse" by Bobjt, CC0 1.0
-(public domain). See examples/demo/CREDITS.md.
-
 MIT License
+
+Copyright (c) 2026 The beatcut authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

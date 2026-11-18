@@ -209,4 +209,4 @@ Bu, hızlı testleri çalıştırır. Yavaş testler gerçek video render eder v
 
 ## Lisans
 
-Kod MIT lisanslıdır (bkz. `LICENSE`). `examples/demo/` içindeki video klipler (`*.mp4`) ve onlardan üretilen `docs/demo.gif` MIT kapsamında değildir; depo sahibinin kendi çekimleridir, bütün hakları saklıdır ve yalnızca aracı denemek için depodadır. Demo müziği "Our expanse" (yazar Bobjt) CC0 1.0 (kamu malı) lisanslıdır. Ayrıntı için `examples/demo/CREDITS.md` dosyasına bakın.
+Kod MIT lisanslıdır (bkz. `LICENSE`). `examples/demo/` içindeki video klipler (`*.mp4`) ve onlardan üretilen `docs/demo.gif` MIT kapsamında değildir; depo sahibinin kendi çekimleridir, bütün hakları saklıdır ve yalnızca aracı denemek için depodadır. Demo müziği "Our expanse" (yazar Bobjt) CC0 1.0 (kamu malı) lisanslıdır. Bu durum `NOTICE` ve ayrıntıların bulunduğu `examples/demo/CREDITS.md` dosyalarında yazılıdır.

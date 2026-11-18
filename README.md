@@ -209,4 +209,4 @@ This runs the fast tests. The slow tests render real video and need ffmpeg: `pyt
 
 ## License
 
-The code is MIT licensed (see `LICENSE`). The video clips in `examples/demo/` (`*.mp4`) and `docs/demo.gif`, which is made from them, are not covered by the MIT license; they are the repository owner's own footage, all rights reserved, and are included only so the tool can be tried. The demo music, "Our expanse" by Bobjt, is CC0 1.0 (public domain). See `examples/demo/CREDITS.md` for details.
+The code is MIT licensed (see `LICENSE`). The video clips in `examples/demo/` (`*.mp4`) and `docs/demo.gif`, which is made from them, are not covered by the MIT license; they are the repository owner's own footage, all rights reserved, and are included only so the tool can be tried. The demo music, "Our expanse" by Bobjt, is CC0 1.0 (public domain). This is stated in `NOTICE` and in `examples/demo/CREDITS.md`, which has the details.
