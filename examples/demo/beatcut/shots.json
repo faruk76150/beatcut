@@ -1,0 +1,182 @@
+{
+ "version": 1,
+ "period": 0.39471,
+ "t0": 0.0498,
+ "tail": 2.0,
+ "shots": [
+  {
+   "clip": "02_inflation_glow.mp4",
+   "in": 0.8,
+   "out": 3.96,
+   "beats": 8,
+   "fit": "fit",
+   "prof": "neutral",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "opening: balloon glows in the dark"
+  },
+  {
+   "clip": "01_balloon_lights_up.mp4",
+   "in": 0.3,
+   "out": 3.46,
+   "beats": 8,
+   "fit": "fit",
+   "prof": "warm",
+   "tin": "fade",
+   "tdur": 0.4,
+   "note": "striped balloon lights up"
+  },
+  {
+   "clip": "03_burner_wide.mp4",
+   "in": 0.5,
+   "out": 2.08,
+   "beats": 8,
+   "fit": "fit",
+   "prof": "neutral",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "burner, half speed from 60 fps"
+  },
+  {
+   "clip": "04_burner_flame.mp4",
+   "in": 0.3,
+   "out": 1.88,
+   "beats": 8,
+   "fit": "fit",
+   "prof": "warm",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "flame close-up, half speed"
+  },
+  {
+   "clip": "04_burner_flame.mp4",
+   "in": 3.0,
+   "out": 3.79,
+   "beats": 2,
+   "fit": "fit",
+   "prof": "warm",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "quick cut"
+  },
+  {
+   "clip": "03_burner_wide.mp4",
+   "in": 3.0,
+   "out": 3.79,
+   "beats": 2,
+   "fit": "fit",
+   "prof": "neutral",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "quick cut"
+  },
+  {
+   "clip": "09_balloon_goes_dark.mp4",
+   "in": 0.5,
+   "out": 1.29,
+   "beats": 2,
+   "fit": "fit",
+   "prof": "warm",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "quick cut"
+  },
+  {
+   "clip": "01_balloon_lights_up.mp4",
+   "in": 4.0,
+   "out": 4.79,
+   "beats": 2,
+   "fit": "fit",
+   "prof": "warm",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "quick cut"
+  },
+  {
+   "clip": "07_dawn_valley.mp4",
+   "in": 1.0,
+   "out": 4.16,
+   "beats": 8,
+   "fit": "fit",
+   "prof": "neutral",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "valley at dawn"
+  },
+  {
+   "clip": "05_balloons_rising.mp4",
+   "in": 0.3,
+   "out": 3.46,
+   "beats": 8,
+   "fit": "fit",
+   "prof": "golden",
+   "tin": "fadewhite",
+   "tdur": 0.4,
+   "note": "sunrise: flash to white"
+  },
+  {
+   "clip": "06_crescent_moon.mp4",
+   "in": 0.5,
+   "out": 2.08,
+   "beats": 8,
+   "fit": "fit",
+   "prof": "cool",
+   "tin": "fade",
+   "tdur": 0.4,
+   "note": "moon and balloons, half speed"
+  },
+  {
+   "clip": "05_balloons_rising.mp4",
+   "in": 2.0,
+   "out": 3.58,
+   "beats": 4,
+   "fit": "fit",
+   "prof": "golden",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "back to the rising balloons"
+  },
+  {
+   "clip": "09_balloon_goes_dark.mp4",
+   "in": 2.4,
+   "out": 5.558,
+   "beats": 8,
+   "fit": "fit",
+   "prof": "warm",
+   "tin": "cut",
+   "tdur": 0.5,
+   "note": "the balloon goes dark"
+  },
+  {
+   "clip": "08_sunset_tree.mp4",
+   "in": 0.5,
+   "out": 3.66,
+   "beats": 8,
+   "fit": "fit",
+   "prof": "golden",
+   "tin": "fade",
+   "tdur": 0.5,
+   "note": "closing: tree at sunset"
+  }
+ ],
+ "bad": {},
+ "clipnotes": {},
+ "markers": [
+  {
+   "beat": 0,
+   "title": "dark"
+  },
+  {
+   "beat": 16,
+   "title": "fire"
+  },
+  {
+   "beat": 48,
+   "title": "sunrise"
+  },
+  {
+   "beat": 76,
+   "title": "end"
+  }
+ ]
+}

@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>beatcut</title>
+<style>
+:root{--bg:#0f1115;--p1:#161920;--p2:#1e222b;--p3:#272c37;--line:#2c313d;--tx:#e8ebf1;--mut:#8b93a4;--acc:#4f9dff;--ok:#43c47c;--bad:#e5534b;--warn:#e2a53d}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:13px/1.4 system-ui,"Segoe UI",Arial,sans-serif;overflow:hidden}
+button,select,input,textarea{font:inherit;color:var(--tx);background:var(--p2);border:1px solid var(--line);border-radius:5px;padding:4px 8px;outline:none}
+button{cursor:pointer}
+button:hover,select:hover,input:hover,textarea:hover{border-color:#47526b}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{border-color:var(--acc)}
+button.pri{background:var(--acc);color:#06121f;border-color:var(--acc);font-weight:600}
+button.on{background:#1c3452;border-color:var(--acc)}
+button:disabled{opacity:.4;cursor:default}
+input[type=number]{width:78px}
+input[type=checkbox]{width:auto;accent-color:var(--acc)}
+.off{pointer-events:none;opacity:.42}
+.mut{color:var(--mut)}.sp{flex:1}
+.lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+
+#app{display:grid;grid-template-columns:224px minmax(0,1fr) 300px;grid-template-rows:44px auto minmax(0,1fr) 204px;height:100%}
+header{grid-column:1/4;grid-row:1;display:flex;align-items:center;gap:10px;padding:0 12px;background:var(--p1);border-bottom:1px solid var(--line);min-width:0}
+header .grp{display:flex;align-items:center;gap:5px}
+header input[type=number]{width:70px;padding:3px 6px}
+#title{font-weight:600;white-space:nowrap}
+#saved{white-space:nowrap;font-size:12px}
+#jobs{display:flex;gap:6px}
+#banners{grid-column:1/4;grid-row:2}
+.banner{padding:8px 14px;border-bottom:1px solid var(--line);background:#2a1716;border-left:4px solid var(--bad);display:flex;flex-direction:column;gap:3px;max-height:150px;overflow:auto}
+.banner .bt{font-weight:600}
+.banner .bl{font-family:Consolas,monospace;font-size:12px;color:#ffb4ae}
+.banner button{align-self:flex-start;margin-top:4px}
+#left{grid-column:1;grid-row:3;background:var(--p1);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+#q{margin:8px;width:calc(100% - 16px)}
+#clips{overflow:auto;flex:1}
+.it{padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:7px}
+.it:hover{background:var(--p2)}.it.sel{background:#1c3452}
+.it .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.it small{color:var(--mut);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:#444c5d;flex:none}
+.dot.used{background:var(--ok)}.dot.working,.dot.queued{background:var(--warn)}.dot.fail,.dot.err{background:var(--bad)}
+.dot.hasbad{box-shadow:0 0 0 2px #e5534b77}
+#center{grid-column:2;grid-row:3;padding:10px 14px;overflow:auto;display:flex;flex-direction:column;gap:10px;min-width:0}
+#cname{font-size:15px}
+.vwrap{position:relative;background:#000;border-radius:8px;overflow:hidden;flex:1;min-height:170px;display:flex;align-items:center;justify-content:center}
+video{max-width:100%;max-height:100%;display:block}
+#vmsg{position:absolute;left:12px;right:12px;text-align:center;color:var(--mut);pointer-events:none}
+#scrub{width:100%;height:64px;background:var(--p1);border-radius:8px;display:block;cursor:crosshair;flex:none;touch-action:none}
+.seg{display:inline-flex}
+.seg button{border-radius:0;margin-left:-1px}
+.seg button:first-child{border-radius:5px 0 0 5px;margin-left:0}
+.seg button:last-child{border-radius:0 5px 5px 0}
+.chip{padding:2px 9px;border-radius:14px;border:1px solid var(--line);background:var(--p2);cursor:pointer;font-size:12px;white-space:nowrap}
+.chip:hover{border-color:var(--acc)}.chip.on{border-color:var(--acc);background:#1c3452}
+.chip.slow{color:var(--warn)}.chip.good{color:var(--ok)}.chip.fast{color:#c08cff}.chip.xx{color:var(--bad)}
+.kbd{font:11px Consolas,monospace;background:#0b0d11;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--mut);margin-left:5px}
+#right{grid-column:3;grid-row:3;background:var(--p1);border-left:1px solid var(--line);overflow:auto;padding:12px;display:flex;flex-direction:column;gap:14px}
+#right h3{margin:0;font-size:13px;font-weight:600}
+#right section{display:flex;flex-direction:column;gap:6px}
+#right textarea{width:100%;min-height:54px;resize:vertical}
+#right select,#right input[type=text]{width:100%}
+.bad-it{display:flex;gap:6px;align-items:center}
+.bad-it input{flex:1;min-width:0}
+.badge{padding:1px 8px;border-radius:9px;font-size:11px;background:#4d2523;color:#ff8b84;cursor:pointer;white-space:nowrap}
+#tl{grid-column:1/4;grid-row:4;background:var(--p1);border-top:1px solid var(--line);display:flex;flex-direction:column;min-width:0;min-height:0}
+#tlbar{display:flex;gap:12px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line)}
+#tlscroll{flex:1;overflow:auto;position:relative}
+#tlin{position:relative;height:100%;min-height:140px}
+.tick{position:absolute;top:20px;height:8px;border-left:1px solid #3a4151}
+.tick.b{top:14px;height:14px;border-color:#5b657b}
+.tick span{position:absolute;left:3px;top:-14px;font-size:11px;color:var(--mut);white-space:nowrap}
+.blk{position:absolute;top:36px;height:80px;border-radius:7px;padding:5px 7px;overflow:hidden;cursor:pointer;border:2px solid transparent;color:#0b0e12}
+.blk .t1{font-weight:700;font-size:12px;white-space:nowrap}
+.blk .t2{font-size:11px;white-space:nowrap;opacity:.85}
+.blk.sel{border-color:#fff;box-shadow:0 0 0 2px var(--acc)}
+.blk.drop{outline:2px dashed var(--acc)}
+.blk .rz{position:absolute;right:0;top:0;bottom:0;width:8px;cursor:ew-resize;background:#0005}
+.blk .bd{position:absolute;right:10px;bottom:4px;font-size:11px;background:#000a;color:#fff;border-radius:6px;padding:0 5px}
+.mk{position:absolute;top:30px;bottom:0;border-left:1px dashed var(--acc);pointer-events:none}
+.mk span{position:absolute;top:118px;left:3px;font-size:11px;color:var(--acc);white-space:nowrap}
+.mk.end{border-color:var(--bad)}.mk.end span{color:var(--bad)}
+.modal{position:fixed;inset:7% 12%;background:var(--p1);border:1px solid var(--acc);border-radius:10px;padding:14px;display:none;flex-direction:column;gap:10px;z-index:9}
+.modal pre{flex:1;overflow:auto;background:#0b0d11;padding:8px;border-radius:6px;margin:0;white-space:pre-wrap;word-break:break-word;font:12px/1.4 Consolas,monospace}
+#helpmodal{inset:12% 28%}
+#helplist{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;overflow:auto;align-items:center}
+#helplist .kbd{margin:0;font-size:12px;padding:1px 7px;justify-self:start}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <span id="title"></span>
+    <span id="saved" class="mut"></span>
+    <span class="grp"><span class="lbl" data-i18n="period"></span><input type="number" id="period" step="0.001" min="0.06" max="9.99"><span id="bpm" class="mut"></span></span>
+    <span class="grp"><span class="lbl" data-i18n="t0"></span><input type="number" id="t0" step="0.01" min="0"></span>
+    <span class="grp"><span class="lbl" data-i18n="tail"></span><input type="number" id="tail" step="0.1" min="0" max="30"></span>
+    <span class="sp"></span>
+    <button id="undo" data-i18n="undo" data-i18n-title="undoTip"></button>
+    <span id="jobs"></span>
+    <button id="helpbtn" data-i18n="help" data-i18n-title="helpTip"></button>
+    <button id="lang"></button>
+  </header>
+
+  <div id="banners">
+    <div id="errLoad" class="banner" style="display:none"></div>
+    <div id="errState" class="banner" style="display:none"></div>
+    <div id="errClips" class="banner" style="display:none"></div>
+    <div id="errSave" class="banner" style="display:none"></div>
+  </div>
+
+  <aside id="left">
+    <input id="q" type="text" data-i18n-ph="search" autocomplete="off">
+    <div id="clips"></div>
+  </aside>
+
+  <main id="center">
+    <div class="row"><b id="cname"></b><span id="cmeta" class="mut"></span><span class="sp"></span><span id="time" style="font-variant-numeric:tabular-nums"></span></div>
+    <div class="vwrap"><video id="v" muted playsinline></video><div id="vmsg"></div></div>
+    <div id="rangebox" style="display:flex;flex-direction:column;gap:10px">
+      <canvas id="scrub"></canvas>
+      <div class="row">
+        <button id="play" style="min-width:84px"></button>
+        <span class="seg"><button data-step="-1">-1</button><button data-step="-0.1">-0.1</button><button data-step="-f" data-i18n="frameBack"></button><button data-step="f" data-i18n="frameFwd"></button><button data-step="0.1">+0.1</button><button data-step="1">+1</button></span>
+        <span class="seg"><button data-rate="0.25">0.25x</button><button data-rate="0.5">0.5x</button><button data-rate="1" class="on">1x</button><button data-rate="2">2x</button></span>
+        <span class="sp"></span>
+        <label class="row" style="gap:4px"><input type="checkbox" id="loop"><span data-i18n="loop"></span></label>
+        <button id="prev"><span data-i18n="playRange"></span><span class="kbd">P</span></button>
+      </div>
+      <div class="row" style="gap:16px">
+        <span class="row"><span class="lbl" data-i18n="inPoint"></span><input type="number" id="in" step="0.01" min="0"><button id="setin"><span data-i18n="setNow"></span><span class="kbd">I</span></button></span>
+        <span class="row"><span class="lbl" data-i18n="outPoint"></span><input type="number" id="out" step="0.01" min="0"><button id="setout"><span data-i18n="setNow"></span><span class="kbd">O</span></button></span>
+        <span class="mut" id="natinfo"></span>
+      </div>
+      <div class="row">
+        <span class="lbl" data-i18n="onTimeline"></span>
+        <span id="chips" class="row"></span>
+        <input type="number" id="beats" min="1" max="512" step="1" style="width:66px" data-i18n-title="beatsTitle">
+      </div>
+      <div class="row">
+        <span class="seg"><button id="mfit" data-i18n="fitMode" data-i18n-title="fitTip"></button><button id="mcut" data-i18n="cutMode" data-i18n-title="cutTip"></button></span>
+        <span id="interpwrap" class="row"><span class="lbl" data-i18n="interp"></span>
+          <select id="interp"><option value="" data-i18n="interp_auto"></option><option value="oflow" data-i18n="interp_oflow"></option><option value="blend" data-i18n="interp_blend"></option><option value="none" data-i18n="interp_none"></option></select></span>
+        <span id="spdinfo" class="mut"></span>
+      </div>
+    </div>
+  </main>
+
+  <aside id="right">
+    <div id="insp" style="display:flex;flex-direction:column;gap:14px">
+      <section><h3 id="rtitle"></h3><div class="mut" id="rsub"></div></section>
+      <section><span class="lbl" data-i18n="note"></span><textarea id="note" maxlength="2000" data-i18n-ph="notePh"></textarea></section>
+      <section><span class="lbl" data-i18n="profile"></span><select id="prof"></select></section>
+      <section><span class="lbl" data-i18n="transition"></span>
+        <div class="row"><select id="tin" style="width:auto;flex:1"><option value="cut" data-i18n="tin_cut"></option><option value="fade" data-i18n="tin_fade"></option><option value="fadewhite" data-i18n="tin_fadewhite"></option></select>
+          <span id="tdurwrap" class="row" style="gap:4px"><input type="number" id="tdur" step="0.1" min="0" max="5" style="width:64px"><span class="mut" data-i18n="unitS"></span></span></div></section>
+      <section class="row" style="flex-direction:row">
+        <button class="pri" id="add"><span data-i18n="addShot"></span><span class="kbd">A</span></button>
+        <button id="dup" data-i18n="dupShot"></button>
+        <button id="del"><span data-i18n="delShot"></span><span class="kbd">Del</span></button>
+        <button id="mvl" data-i18n="moveEarlier" data-i18n-title="moveEarlierTip"></button>
+        <button id="mvr" data-i18n="moveLater" data-i18n-title="moveLaterTip"></button>
+      </section>
+    </div>
+    <section id="clipbox"><span class="lbl" data-i18n="thisClip"></span>
+      <input id="cnote" type="text" data-i18n-ph="clipNotePh" autocomplete="off">
+      <div class="row"><button id="mkbad"><span data-i18n="markBad"></span><span class="kbd">X</span></button></div>
+      <div id="badlist" style="display:flex;flex-direction:column;gap:5px"></div></section>
+  </aside>
+
+  <section id="tl">
+    <div id="tlbar"><span id="totals"></span><span id="music"></span><span id="used" class="mut"></span><span class="sp"></span><span class="mut" data-i18n="zoom"></span><input type="range" id="zoom" min="6" max="44" value="16" style="width:120px"></div>
+    <div id="tlscroll"><div id="tlin"></div></div>
+  </section>
+</div>
+
+<div id="jobmodal" class="modal"><div class="row"><b id="jtitle"></b><span class="sp"></span><button id="jclose" data-i18n="close"></button></div><pre id="jlog"></pre></div>
+<div id="helpmodal" class="modal"><div class="row"><b data-i18n="helpTitle"></b><span class="sp"></span><button id="hclose" data-i18n="close"></button></div><div id="helplist"></div></div>
+
+<script type="application/json" id="i18n">
+{
+"en": {
+"appTitle": "beatcut picker",
+"search": "Search clips...",
+"period": "Beat period (s)",
+"bpm": "{0} BPM",
+"t0": "First beat (s)",
+"tail": "Tail (s)",
+"undo": "Undo",
+"undoTip": "Undo (Ctrl+Z), 80 steps",
+"help": "Help",
+"helpTip": "Keyboard shortcuts (?)",
+"switchTo": "Türkçe",
+"saving": "Saving...",
+"saved": "Saved {0}",
+"notSaved": "Not saved",
+"saveBlocked": "Saving is off until you start empty",
+"saveErrTitle": "The server did not accept the selection:",
+"stateErrTitle": "shots.json is invalid. Nothing is saved until you start empty (the old file is then backed up as shots.json.bak):",
+"startEmpty": "Start empty",
+"clipsErrTitle": "The clips folder could not be read:",
+"badNumbers": "Some numbers are not valid, so nothing was saved.",
+"netError": "Could not reach the server.",
+"loadError": "Could not load the project. Reload the page to try again.",
+"noClips": "No clips found.",
+"pickClip": "Pick a clip on the left.",
+"st_queued": "queued",
+"st_working": "converting",
+"st_ok": "ready",
+"st_fail": "failed",
+"st_missing": "no preview",
+"previewWait": "Preparing the preview...",
+"previewFail": "The preview could not be made.",
+"previewMissing": "There is no preview for this clip.",
+"previewError": "The preview could not be played.",
+"clipGone": "This clip is not in the clips folder.",
+"clipUnreadable": "This clip could not be read: {0}",
+"play": "Play",
+"pause": "Pause",
+"frameBack": "-1 frame",
+"frameFwd": "+1 frame",
+"loop": "Loop range",
+"playRange": "Play range",
+"inPoint": "In",
+"outPoint": "Out",
+"setNow": "Now",
+"natural": "Natural length {0} s",
+"onTimeline": "On the timeline",
+"beatsTitle": "Number of beats",
+"chip": "{0} beats · {1} s · x{2}",
+"fitMode": "Fit (speed changes)",
+"fitTip": "A short range slows down, a long one speeds up",
+"cutMode": "Cut (1x)",
+"cutTip": "Plays at 1x and cuts the end to the beat count",
+"interp": "Slow-motion frames",
+"interp_auto": "Automatic",
+"interp_oflow": "Optical flow",
+"interp_blend": "Blend",
+"interp_none": "None",
+"spd_cut": "Cut to the beat count (1x)",
+"spd_same": "1x, speed unchanged",
+"spd_slow": "Slow motion x{0} ({1}%)",
+"spd_fast": "Sped up x{0}",
+"pastEnd": "The range runs past the end of the clip.",
+"shotTitle": "Shot {0}",
+"newShot": "New shot",
+"shotSubSel": "{0} · changes are saved automatically",
+"shotSubNew": "{0} · set the range, then add the shot",
+"note": "Note",
+"notePh": "What happens here?",
+"profile": "Colour profile",
+"transition": "Transition in",
+"tin_cut": "Cut",
+"tin_fade": "Dissolve",
+"tin_fadewhite": "Flash to white",
+"unitS": "s",
+"addShot": "Add shot",
+"dupShot": "Duplicate",
+"delShot": "Delete",
+"moveEarlier": "Earlier",
+"moveEarlierTip": "Move the shot one place earlier",
+"moveLater": "Later",
+"moveLaterTip": "Move the shot one place later",
+"thisClip": "This clip",
+"clipNotePh": "Clip note",
+"markBad": "Mark range as bad",
+"badNotePh": "Why is it bad?",
+"removeTip": "Remove",
+"zoom": "Zoom",
+"totals": "{0} shots · {1} beats · {2}",
+"clipsUsed": "{0}/{1} clips",
+"musicOver": "music {0} ({1} s too short)",
+"musicFree": "music {0} ({1} s to spare)",
+"musicEnds": "music ends",
+"job_check": "Check",
+"job_draft": "Draft",
+"job_final": "Final render",
+"jobRunning": "{0} is running...",
+"jobDone": "{0} finished",
+"jobFailed": "{0} failed (exit code {1})",
+"jobBusy": "Another job is already running.",
+"jobNotSaved": "The selection could not be saved, so the job was not started.",
+"close": "Close",
+"helpTitle": "Keyboard shortcuts",
+"sc_play_k": "Space",
+"sc_play_d": "Play or pause",
+"sc_seek_k": "Left / Right",
+"sc_seek_d": "Back or forward 0.5 s",
+"sc_seekbig_k": "Shift + Left / Right",
+"sc_seekbig_d": "Back or forward 5 s",
+"sc_frame_k": "Alt + Left / Right, comma, period",
+"sc_frame_d": "Back or forward one frame",
+"sc_in_k": "I",
+"sc_in_d": "Set the in point to the playhead",
+"sc_out_k": "O",
+"sc_out_d": "Set the out point to the playhead",
+"sc_add_k": "A",
+"sc_add_d": "Add the shot",
+"sc_bad_k": "X",
+"sc_bad_d": "Mark the range as bad",
+"sc_prev_k": "P",
+"sc_prev_d": "Play the range at the computed speed",
+"sc_clip_k": "[ ] or Up / Down",
+"sc_clip_d": "Previous or next clip",
+"sc_del_k": "Delete",
+"sc_del_d": "Delete the selected shot",
+"sc_esc_k": "Esc",
+"sc_esc_d": "Deselect (new shot) or close a dialog",
+"sc_undo_k": "Ctrl + Z",
+"sc_undo_d": "Undo",
+"sc_help_k": "?",
+"sc_help_d": "Show or hide this list"
+},
+"tr": {
+"appTitle": "beatcut seçici",
+"search": "Klip ara...",
+"period": "Vuruş aralığı (sn)",
+"bpm": "{0} BPM",
+"t0": "İlk vuruş (sn)",
+"tail": "Kapanış payı (sn)",
+"undo": "Geri al",
+"undoTip": "Geri al (Ctrl+Z), 80 adım",
+"help": "Yardım",
+"helpTip": "Klavye kısayolları (?)",
+"switchTo": "English",
+"saving": "Kaydediliyor...",
+"saved": "Kaydedildi {0}",
+"notSaved": "Kaydedilmedi",
+"saveBlocked": "Boş başlayana kadar kayıt kapalı",
+"saveErrTitle": "Sunucu seçimi kabul etmedi:",
+"stateErrTitle": "shots.json geçersiz. Boş başlayana kadar hiçbir şey kaydedilmez (eski dosya o zaman shots.json.bak olarak yedeklenir):",
+"startEmpty": "Boş başla",
+"clipsErrTitle": "Klip klasörü okunamadı:",
+"badNumbers": "Bazı sayılar geçersiz; hiçbir şey kaydedilmedi.",
+"netError": "Sunucuya ulaşılamadı.",
+"loadError": "Proje yüklenemedi. Yeniden denemek için sayfayı yenile.",
+"noClips": "Klip bulunamadı.",
+"pickClip": "Soldan bir klip seç.",
+"st_queued": "sırada",
+"st_working": "dönüştürülüyor",
+"st_ok": "hazır",
+"st_fail": "başarısız",
+"st_missing": "önizleme yok",
+"previewWait": "Önizleme hazırlanıyor...",
+"previewFail": "Önizleme üretilemedi.",
+"previewMissing": "Bu klibin önizlemesi yok.",
+"previewError": "Önizleme oynatılamadı.",
+"clipGone": "Bu klip klasörde yok.",
+"clipUnreadable": "Bu klip okunamadı: {0}",
+"play": "Oynat",
+"pause": "Duraklat",
+"frameBack": "-1 kare",
+"frameFwd": "+1 kare",
+"loop": "Aralığı döngüye al",
+"playRange": "Aralığı oynat",
+"inPoint": "Giriş",
+"outPoint": "Çıkış",
+"setNow": "Şimdi",
+"natural": "Doğal süre {0} sn",
+"onTimeline": "Zaman çizelgesinde",
+"beatsTitle": "Vuruş sayısı",
+"chip": "{0} vuruş · {1} sn · x{2}",
+"fitMode": "Sığdır (hız değişir)",
+"fitTip": "Kısa aralık yavaşlar, uzun aralık hızlanır",
+"cutMode": "Kes (1x)",
+"cutTip": "1x oynar, sonunu vuruş sayısına göre keser",
+"interp": "Ara kareler",
+"interp_auto": "Otomatik",
+"interp_oflow": "Optik akış",
+"interp_blend": "Harmanla",
+"interp_none": "Yok",
+"spd_cut": "Vuruş sayısına göre kesilir (1x)",
+"spd_same": "1x, hız değişmez",
+"spd_slow": "Yavaş çekim x{0} (%{1})",
+"spd_fast": "Hızlandırma x{0}",
+"pastEnd": "Aralık klibin sonunu aşıyor.",
+"shotTitle": "Çekim {0}",
+"newShot": "Yeni çekim",
+"shotSubSel": "{0} · değişiklikler otomatik kaydedilir",
+"shotSubNew": "{0} · aralığı seç, sonra çekimi ekle",
+"note": "Not",
+"notePh": "Burada ne oluyor?",
+"profile": "Renk profili",
+"transition": "Giriş geçişi",
+"tin_cut": "Kesme",
+"tin_fade": "Çapraz geçiş",
+"tin_fadewhite": "Beyaza parlama",
+"unitS": "sn",
+"addShot": "Çekim ekle",
+"dupShot": "Çoğalt",
+"delShot": "Sil",
+"moveEarlier": "Öne al",
+"moveEarlierTip": "Çekimi bir sıra öne al",
+"moveLater": "Sonraya al",
+"moveLaterTip": "Çekimi bir sıra sonraya al",
+"thisClip": "Bu klip",
+"clipNotePh": "Klip notu",
+"markBad": "Aralığı kötü işaretle",
+"badNotePh": "Neden kötü?",
+"removeTip": "Kaldır",
+"zoom": "Yakınlaştır",
+"totals": "{0} çekim · {1} vuruş · {2}",
+"clipsUsed": "{0}/{1} klip",
+"musicOver": "müzik {0} ({1} sn yetmiyor)",
+"musicFree": "müzik {0} ({1} sn boş)",
+"musicEnds": "müzik biter",
+"job_check": "Denetle",
+"job_draft": "Taslak",
+"job_final": "Son render",
+"jobRunning": "{0} çalışıyor...",
+"jobDone": "{0} bitti",
+"jobFailed": "{0} başarısız (çıkış kodu {1})",
+"jobBusy": "Başka bir iş zaten çalışıyor.",
+"jobNotSaved": "Seçim kaydedilemedi, bu yüzden iş başlatılmadı.",
+"close": "Kapat",
+"helpTitle": "Klavye kısayolları",
+"sc_play_k": "Boşluk",
+"sc_play_d": "Oynat ya da duraklat",
+"sc_seek_k": "Sol / Sağ",
+"sc_seek_d": "0,5 sn geri ya da ileri",
+"sc_seekbig_k": "Shift + Sol / Sağ",
+"sc_seekbig_d": "5 sn geri ya da ileri",
+"sc_frame_k": "Alt + Sol / Sağ, virgül, nokta",
+"sc_frame_d": "Bir kare geri ya da ileri",
+"sc_in_k": "I",
+"sc_in_d": "Giriş noktasını oynatma konumuna koy",
+"sc_out_k": "O",
+"sc_out_d": "Çıkış noktasını oynatma konumuna koy",
+"sc_add_k": "A",
+"sc_add_d": "Çekimi ekle",
+"sc_bad_k": "X",
+"sc_bad_d": "Aralığı kötü işaretle",
+"sc_prev_k": "P",
+"sc_prev_d": "Aralığı hesaplanan hızda oynat",
+"sc_clip_k": "[ ] ya da Yukarı / Aşağı",
+"sc_clip_d": "Önceki ya da sonraki klip",
+"sc_del_k": "Delete",
+"sc_del_d": "Seçili çekimi sil",
+"sc_esc_k": "Esc",
+"sc_esc_d": "Seçimi kaldır (yeni çekim) ya da pencereyi kapat",
+"sc_undo_k": "Ctrl + Z",
+"sc_undo_d": "Geri al",
+"sc_help_k": "?",
+"sc_help_d": "Bu listeyi göster ya da gizle"
+}
+}
+</script>
+
+<script>
+'use strict';
+const TOKEN = "__BEATCUT_TOKEN__";
+const HEADERS = {'Content-Type': 'application/json', 'X-Beatcut-Token': TOKEN};
+const $ = s => document.querySelector(s);
+const WORDS = JSON.parse($('#i18n').textContent);
+const LANGS = Object.keys(WORDS);
+const SHORTCUTS = ['play', 'seek', 'seekbig', 'frame', 'in', 'out', 'add', 'bad', 'prev', 'clip', 'del', 'esc', 'undo', 'help'];
+const COL = {bg: '#161920', bad: 'rgba(229,83,75,0.38)', used: 'rgba(67,196,124,0.45)', range: 'rgba(79,157,255,0.35)',
+  handle: '#4f9dff', tick: '#8b93a4', head: '#ffffff'};
+
+function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function storeSet(k, val) { try { localStorage.setItem(k, val); } catch (e) { /* storage may be blocked */ } }
+function chooseLang() {
+  let l = null;
+  try { l = new URLSearchParams(location.search).get('lang'); } catch (e) { l = null; }
+  if (!LANGS.includes(l)) l = storeGet('beatcut.lang');
+  if (!LANGS.includes(l)) l = (navigator.language || '').toLowerCase().startsWith('tr') ? 'tr' : 'en';
+  return LANGS.includes(l) ? l : 'en';
+}
+let LANG = chooseLang();
+const t = (k, ...a) => {
+  const s = WORDS[LANG][k];
+  return s == null ? k : s.replace(/\{(\d+)\}/g, (m, i) => (a[i] == null ? '' : String(a[i])));
+};
+
+/* ---------- state ---------- */
+let S = null, project = {name: '', profiles: [], jobs: []}, CLIPS = [], MD = null;
+let cur = null, sel = -1, draft = null, hist = [], PXB = 16;
+let stopAt = null, dragI = -1, loadedSrc = null, videoFailed = false, pendingSeek = null, rate = 1;
+let stateErrors = [], clipsError = null, saveErrors = null, loadFailed = false, blockSave = false;
+let jobRunning = false, savedInfo = null;
+
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const r2 = x => Math.round(x * 100) / 100;
+const fmt = x => { if (!isFinite(x)) return '-'; x = r2(x); const m = Math.floor(x / 60); return m + ':' + (x - m * 60).toFixed(2).padStart(5, '0'); };
+const fmtS = x => fmt(x).replace(/\.\d+$/, '');
+const own = (o, k, def) => (o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : def);
+const numVal = input => { const s = input.value.trim(); if (s === '') return null; const x = Number(s); return isFinite(x) ? x : null; };
+const P = () => S.period;
+const T = k => S.t0 + P() * k;
+const clipInfo = n => CLIPS.find(c => c.name === n);
+const dur = () => { const c = clipInfo(cur); return c && isFinite(c.duration) ? c.duration : 0; };
+const usable = () => dur() > 0.05;
+const fps = () => { const c = clipInfo(cur); return c && c.fps > 0 ? c.fps : 30; };
+const snap = x => Math.round(x * fps()) / fps();
+const nat = s => Math.max(0.05, s.out - s.in);
+const speedOf = s => (s.fit === 'cut' ? 1 : nat(s) / (s.beats * P()));
+const shotObj = () => (sel >= 0 ? S.shots[sel] : draft);
+const defaultProf = () => (project.profiles.includes('neutral') ? 'neutral' : (project.profiles[0] || 'neutral'));
+const hue = name => { let h = 0; for (const ch of String(name)) h = (h * 31 + ch.codePointAt(0)) % 360; return h; };
+
+function newDraft() {
+  const d = dur();
+  if (!(d > 0.05)) return null;
+  const out = r2(Math.min(d, 3));
+  return {clip: cur, in: 0, out, beats: clamp(Math.round(out / P()), 1, 512), fit: 'fit', prof: defaultProf(), tin: 'cut', tdur: 0.5, note: ''};
+}
+
+/* Keeps a shot inside the rules of the format: 0 <= in < out, 1 <= beats <= 512. */
+function finish(s) {
+  const d = dur();
+  s.beats = clamp(Math.round(s.beats) || 1, 1, 512);
+  s.in = r2(clamp(s.in, 0, d > 0 ? Math.max(0, d - 0.05) : Infinity));
+  if (s.fit === 'cut') s.out = r2(s.in + s.beats * P());
+  else s.out = r2(clamp(s.out, s.in + 0.05, d > 0 ? Math.max(d, s.in + 0.05) : Infinity));
+  if (!(s.out > s.in)) s.out = r2(s.in + 0.05);
+}
+
+/* ---------- history ---------- */
+function snapStr() { return JSON.stringify({shots: S.shots, bad: S.bad, clipnotes: S.clipnotes, markers: S.markers, period: S.period, t0: S.t0, tail: S.tail}); }
+function pushHist(str) { hist.push(str); if (hist.length > 80) hist.shift(); }
+function commit(before) { if (before != null && snapStr() !== before) { pushHist(before); save(); } }
+function mutate(fn) { const before = snapStr(); fn(); commit(before); renderAll(); }
+function edit(fn) {
+  const s = shotObj(); if (!s) return;
+  const before = sel >= 0 ? snapStr() : null;
+  fn(s); finish(s);
+  commit(before); renderAll();
+}
+function undo() {
+  const h = hist.pop(); if (!h) return;
+  Object.assign(S, JSON.parse(h));
+  if (sel >= S.shots.length) { sel = -1; draft = newDraft(); }
+  save(); renderAll();
+}
+
+/* ---------- saving ---------- */
+let saveT = null, dirty = false, lastOk = true, chain = Promise.resolve(true);
+function setSaved(k, a, cls) { savedInfo = k ? {k, a: a || [], cls: cls || ''} : null; renderSaved(); }
+function renderSaved() {
+  const n = $('#saved');
+  n.textContent = savedInfo ? t(savedInfo.k, ...savedInfo.a) : '';
+  n.className = savedInfo ? (savedInfo.cls || 'mut') : 'mut';
+}
+function numsOk(o) {
+  if (typeof o === 'number') return isFinite(o);
+  if (o && typeof o === 'object') return Object.values(o).every(numsOk);
+  return true;
+}
+function save() {
+  if (blockSave) { setSaved('saveBlocked', [], 'warn'); return; }
+  dirty = true; setSaved('saving');
+  clearTimeout(saveT); saveT = setTimeout(queueSave, 400);
+}
+function queueSave() { clearTimeout(saveT); saveT = null; chain = chain.then(sendNow); return chain; }
+async function sendNow() {
+  if (blockSave) return true;
+  if (!dirty) return lastOk;
+  dirty = false;
+  if (!numsOk(S)) {
+    dirty = true; lastOk = false;
+    saveErrors = [t('badNumbers')]; renderBanners(); setSaved('notSaved', [], 'bad');
+    return false;
+  }
+  try {
+    const r = await fetch('/api/state', {method: 'POST', headers: HEADERS, body: JSON.stringify({state: S})});
+    let j = {};
+    try { j = await r.json(); } catch (e) { j = {}; }
+    if (r.ok && j.ok === true) {
+      lastOk = true; saveErrors = null; renderBanners();
+      if (!dirty) setSaved('saved', [new Date().toLocaleTimeString()], 'ok');
+      return true;
+    }
+    dirty = true; lastOk = false;
+    saveErrors = Array.isArray(j.errors) ? j.errors.map(String) : [String(j.error || ('HTTP ' + r.status))];
+    renderBanners(); setSaved('notSaved', [], 'bad');
+    return false;
+  } catch (e) {
+    dirty = true; lastOk = false;
+    saveErrors = [t('netError')]; renderBanners(); setSaved('notSaved', [], 'bad');
+    return false;
+  }
+}
+async function flushSave() {
+  if (blockSave) return true;
+  if (saveT) { clearTimeout(saveT); saveT = null; }
+  return queueSave();
+}
+function startEmpty() {
+  stateErrors = []; blockSave = false; hist = []; sel = -1; draft = newDraft();
+  renderBanners(); save(); renderAll();
+}
+
+/* ---------- banners ---------- */
+function fillBanner(box, title, lines, button) {
+  box.replaceChildren();
+  if (!lines || !lines.length) { box.style.display = 'none'; return; }
+  box.style.display = '';
+  box.appendChild(el('div', 'bt', title));
+  lines.forEach(l => box.appendChild(el('div', 'bl', String(l))));
+  if (button) { const b = el('button', 'pri', t('startEmpty')); b.onclick = startEmpty; box.appendChild(b); }
+}
+function renderBanners() {
+  fillBanner($('#errLoad'), t('loadError'), loadFailed ? [t('netError')] : [], false);
+  fillBanner($('#errState'), t('stateErrTitle'), stateErrors, true);
+  fillBanner($('#errClips'), t('clipsErrTitle'), clipsError ? [clipsError] : [], false);
+  fillBanner($('#errSave'), t('saveErrTitle'), saveErrors, false);
+}
+
+/* ---------- language ---------- */
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.title = t('appTitle');
+  document.querySelectorAll('[data-i18n]').forEach(n => { n.textContent = t(n.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach(n => { n.title = t(n.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(n => { n.placeholder = t(n.dataset.i18nPh); });
+  $('#lang').textContent = t('switchTo');
+  $('#title').textContent = t('appTitle') + (project.name ? ' · ' + project.name : '');
+  setPlayLabel(); labelJobs(); renderSaved(); renderBanners(); renderHelp(); renderAll();
+}
+$('#lang').onclick = () => {
+  LANG = LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length];
+  storeSet('beatcut.lang', LANG);
+  applyLang();
+};
+function setPlayLabel() { $('#play').textContent = t(v.paused ? 'play' : 'pause'); }
+function renderHelp() {
+  const box = $('#helplist'); box.replaceChildren();
+  SHORTCUTS.forEach(k => { box.appendChild(el('span', 'kbd', t('sc_' + k + '_k'))); box.appendChild(el('span', '', t('sc_' + k + '_d'))); });
+}
+
+/* ---------- loading ---------- */
+const v = $('#v'), cv = $('#scrub');
+async function load() {
+  let j;
+  try {
+    const r = await fetch('/api/state');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    j = await r.json();
+  } catch (e) { loadFailed = true; applyLang(); return; }
+  project = Object.assign({name: '', profiles: [], jobs: []}, j.project || {});
+  CLIPS = Array.isArray(j.clips) ? j.clips : [];
+  MD = typeof j.music_duration === 'number' ? j.music_duration : null;
+  S = j.state;
+  if (!Array.isArray(S.shots)) S.shots = [];
+  if (!S.bad || typeof S.bad !== 'object') S.bad = {};
+  if (!S.clipnotes || typeof S.clipnotes !== 'object') S.clipnotes = {};
+  if (!Array.isArray(S.markers)) S.markers = [];
+  stateErrors = Array.isArray(j.state_errors) ? j.state_errors : [];
+  blockSave = stateErrors.length > 0;
+  clipsError = j.clips_error || null;
+  const ps = $('#prof'); ps.replaceChildren();
+  project.profiles.forEach(p => { const o = el('option', '', p); o.value = p; ps.appendChild(o); });
+  buildJobs();
+  PXB = +$('#zoom').value;
+  if (CLIPS.length) selectClip(CLIPS[0].name);
+  applyLang();
+  pollStatus();
+}
+
+/* ---------- jobs ---------- */
+function jobLabel(n) { return WORDS[LANG]['job_' + n] != null ? t('job_' + n) : n; }
+function buildJobs() {
+  const box = $('#jobs'); box.replaceChildren();
+  project.jobs.forEach(n => { const b = el('button', '', n); b.dataset.job = n; b.onclick = () => runJob(n); box.appendChild(b); });
+}
+function labelJobs() { document.querySelectorAll('#jobs button').forEach(b => { b.textContent = jobLabel(b.dataset.job); b.disabled = jobRunning; }); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function showJob(title, log) { $('#jtitle').textContent = title; $('#jlog').textContent = log; $('#jobmodal').style.display = 'flex'; }
+function endJob(title) { jobRunning = false; $('#jtitle').textContent = title; labelJobs(); }
+async function runJob(name) {
+  if (jobRunning) return;
+  jobRunning = true; labelJobs();
+  showJob(t('jobRunning', jobLabel(name)), '');
+  if (!(await flushSave())) { endJob(t('jobNotSaved')); return; }
+  let id;
+  try {
+    const r = await fetch('/api/job', {method: 'POST', headers: HEADERS, body: JSON.stringify({job: name})});
+    let j = {};
+    try { j = await r.json(); } catch (e) { j = {}; }
+    if (!r.ok) { endJob(r.status === 409 ? t('jobBusy') : String(j.error || ('HTTP ' + r.status))); return; }
+    id = j.id;
+  } catch (e) { endJob(t('netError')); return; }
+  let fails = 0;
+  for (;;) {
+    await sleep(900);
+    let j;
+    try { j = await (await fetch('/api/job?id=' + encodeURIComponent(id))).json(); fails = 0; }
+    catch (e) { if (++fails > 10) { endJob(t('netError')); return; } continue; }
+    const log = $('#jlog'); log.textContent = typeof j.log === 'string' ? j.log : ''; log.scrollTop = log.scrollHeight;
+    if (j.done) { endJob(j.rc === 0 ? t('jobDone', jobLabel(name)) : t('jobFailed', jobLabel(name), j.rc)); return; }
+  }
+}
+$('#jclose').onclick = () => { $('#jobmodal').style.display = 'none'; };
+$('#helpbtn').onclick = () => toggleHelp();
+$('#hclose').onclick = () => toggleHelp(false);
+function toggleHelp(on) { const m = $('#helpmodal'); const open = on == null ? m.style.display !== 'flex' : on; m.style.display = open ? 'flex' : 'none'; }
+
+/* ---------- clips and video ---------- */
+function selectClip(n, keep) {
+  cur = n; pendingSeek = null;
+  if (!keep) { sel = -1; draft = newDraft(); }
+  $('#cnote').value = own(S.clipnotes, n, '');
+  updateVideo(); renderAll();
+}
+function updateVideo() {
+  const c = clipInfo(cur);
+  const want = c && c.status === 'ok' && !c.error ? '/proxy/' + encodeURIComponent(cur) : null;
+  if (want) {
+    if (loadedSrc !== want) { loadedSrc = want; videoFailed = false; v.src = want; }
+  } else if (loadedSrc) { loadedSrc = null; v.removeAttribute('src'); v.load(); }
+  renderMsg();
+}
+function renderMsg() {
+  const c = clipInfo(cur); let m = '';
+  if (!cur) m = t(CLIPS.length ? 'pickClip' : 'noClips');
+  else if (!c) m = t('clipGone');
+  else if (c.error) m = t('clipUnreadable', c.error);
+  else if (c.status === 'queued' || c.status === 'working') m = t('previewWait');
+  else if (c.status === 'fail') m = t('previewFail');
+  else if (c.status !== 'ok') m = t('previewMissing');
+  else if (videoFailed) m = t('previewError');
+  $('#vmsg').textContent = m;
+}
+v.onerror = () => { if (loadedSrc) { videoFailed = true; renderMsg(); } };
+v.onloadedmetadata = () => { if (pendingSeek != null) { v.currentTime = pendingSeek; pendingSeek = null; } drawScrub(); };
+function seekTo(x) { if (v.readyState > 0) v.currentTime = x; else pendingSeek = x; }
+function pick(i) {
+  sel = i; const s = S.shots[i];
+  if (s.clip !== cur) selectClip(s.clip, true);
+  seekTo(s.in); renderAll();
+}
+async function pollStatus() {
+  let st;
+  try { st = await (await fetch('/api/status')).json(); } catch (e) { setTimeout(pollStatus, 4000); return; }
+  let wait = false, changed = false;
+  CLIPS.forEach(c => {
+    const n = own(st, c.name, null);
+    if (n && n !== c.status) { c.status = n; changed = true; }
+    if (c.status === 'queued' || c.status === 'working') wait = true;
+  });
+  if (changed) { updateVideo(); renderClips(); }
+  if (wait) setTimeout(pollStatus, 2500);
+}
+
+/* ---------- render: left ---------- */
+function renderClips() {
+  const q = $('#q').value.toLowerCase(), box = $('#clips'); box.replaceChildren();
+  CLIPS.forEach(c => {
+    const note = own(S.clipnotes, c.name, ''), used = S.shots.filter(s => s.clip === c.name).length;
+    const nbad = (own(S.bad, c.name, []) || []).length;
+    if (q && !(c.name + ' ' + note).toLowerCase().includes(q)) return;
+    const d = el('div', 'it' + (c.name === cur ? ' sel' : ''));
+    d.title = [c.name, note, c.error ? t('clipUnreadable', c.error) : ''].filter(Boolean).join('\n');
+    const st = c.error ? 'err' : (used ? 'used' : c.status);
+    d.appendChild(el('span', 'dot ' + st + (nbad ? ' hasbad' : '')));
+    d.appendChild(el('span', 'nm', c.name));
+    const bits = [];
+    if (used) bits.push(used + 'x');
+    if (c.status !== 'ok') bits.push(t('st_' + c.status));
+    else if (isFinite(c.duration)) bits.push(fmtS(c.duration));
+    d.appendChild(el('small', '', bits.join(' · ')));
+    d.onclick = () => selectClip(c.name);
+    box.appendChild(d);
+  });
+}
+
+/* ---------- render: center ---------- */
+function renderRange() {
+  const s = shotObj(), c = clipInfo(cur);
+  $('#cname').textContent = cur || '';
+  $('#cmeta').textContent = c && isFinite(c.duration) ? [fmt(c.duration), c.w + 'x' + c.h, (+c.fps).toFixed(2) + ' fps'].join(' · ') : '';
+  $('#rangebox').classList.toggle('off', !(s && usable()));
+  const chips = $('#chips'); chips.replaceChildren();
+  if (!s) { $('#natinfo').textContent = ''; $('#spdinfo').textContent = ''; return; }
+  const sp = speedOf(s), N = nat(s);
+  $('#in').value = r2(s.in); $('#out').value = r2(s.out); $('#beats').value = s.beats;
+  $('#natinfo').textContent = t('natural', N.toFixed(2));
+  $('#mfit').classList.toggle('on', s.fit !== 'cut'); $('#mcut').classList.toggle('on', s.fit === 'cut');
+  const n0 = Math.max(1, Math.round(N / P()));
+  const opts = [...new Set([n0 - 3, n0 - 2, n0 - 1, n0, n0 + 1, n0 + 2, n0 + 3, n0 + 4])].filter(x => x >= 1 && x <= 512).sort((a, b) => a - b);
+  opts.forEach(n => {
+    const x = N / (n * P());
+    const cls = Math.abs(x - 1) < 0.03 ? 'good' : (x < 0.5 || x > 1.8 ? 'xx' : (x < 1 ? 'slow' : 'fast'));
+    const chip = el('span', 'chip ' + cls + (n === s.beats ? ' on' : ''), t('chip', n, (n * P()).toFixed(1), x.toFixed(2)));
+    chip.onclick = () => setBeats(n); chips.appendChild(chip);
+  });
+  $('#interpwrap').style.display = s.fit === 'cut' ? 'none' : '';
+  $('#interp').value = own(s, 'interp', '');
+  let info = Math.abs(sp - 1) < 0.015 ? t('spd_same') : (sp < 1 ? t('spd_slow', sp.toFixed(2), Math.round(sp * 100)) : t('spd_fast', sp.toFixed(2)));
+  if (s.fit === 'cut') info = t('spd_cut');
+  if (dur() > 0 && s.out > dur() + 0.005) info += ' · ' + t('pastEnd');
+  $('#spdinfo').textContent = info;
+  $('#spdinfo').className = dur() > 0 && s.out > dur() + 0.005 ? 'warn' : 'mut';
+}
+function setBeats(n) { edit(s => { s.beats = n; }); }
+function setIn(x) { edit(s => { s.in = snap(x); if (s.fit !== 'cut' && s.out <= s.in + 0.05) s.out = s.in + 0.5; }); }
+function setOut(x) {
+  edit(s => {
+    x = snap(x); if (x <= s.in + 0.04) return;
+    s.out = x; s.beats = Math.round((x - s.in) / P());
+  });
+}
+function updateTime() {
+  const c = clipInfo(cur);
+  $('#time').textContent = fmt(v.currentTime || 0) + ' / ' + fmt(c ? c.duration : NaN);
+}
+function drawScrub() {
+  const c = clipInfo(cur), dpr = window.devicePixelRatio || 1;
+  const w = cv.width = Math.max(1, Math.round(cv.clientWidth * dpr)), h = cv.height = Math.round(64 * dpr), g = cv.getContext('2d');
+  g.fillStyle = COL.bg; g.fillRect(0, 0, w, h);
+  if (!c || !usable()) return;
+  const s = shotObj(), x = tt => tt / c.duration * w;
+  g.fillStyle = COL.bad;
+  (own(S.bad, cur, []) || []).forEach(b => g.fillRect(x(b.a), 0, x(b.b) - x(b.a), h));
+  S.shots.forEach((q, i) => {
+    if (q.clip !== cur || i === sel) return;
+    g.fillStyle = COL.used; g.fillRect(x(q.in), 18 * dpr, x(q.out) - x(q.in), h - 30 * dpr);
+  });
+  if (s) {
+    g.fillStyle = COL.range; g.fillRect(x(s.in), 8 * dpr, x(s.out) - x(s.in), h - 16 * dpr);
+    g.fillStyle = COL.handle; g.fillRect(x(s.in) - 2 * dpr, 4 * dpr, 4 * dpr, h - 8 * dpr); g.fillRect(x(s.out) - 2 * dpr, 4 * dpr, 4 * dpr, h - 8 * dpr);
+  }
+  g.fillStyle = COL.tick; g.font = (10 * dpr) + 'px sans-serif';
+  const step = c.duration > 120 ? 20 : (c.duration > 40 ? 10 : 5);
+  for (let q = 0; q < c.duration; q += step) { g.fillRect(x(q), h - 7 * dpr, 1, 7 * dpr); g.fillText(String(Math.round(q)), x(q) + 3, h - 9 * dpr); }
+  g.fillStyle = COL.head; g.fillRect(x(v.currentTime || 0) - dpr, 0, 2 * dpr, h);
+}
+cv.addEventListener('pointerdown', e => {
+  const c = clipInfo(cur), s = shotObj(); if (!c || !usable()) return;
+  const rect = () => cv.getBoundingClientRect();
+  const tOf = ev => clamp((ev.clientX - rect().left) / rect().width * c.duration, 0, c.duration);
+  const px = tt => tt / c.duration * rect().width + rect().left;
+  let mode = 'seek';
+  if (s) mode = Math.abs(e.clientX - px(s.in)) < 9 ? 'in' : (Math.abs(e.clientX - px(s.out)) < 9 ? 'out' : 'seek');
+  const before = sel >= 0 && mode !== 'seek' ? snapStr() : null;
+  const mv = ev => {
+    const x = tOf(ev);
+    if (mode === 'seek') { v.currentTime = x; return; }
+    const o = shotObj(); if (!o) return;
+    if (mode === 'in') o.in = Math.min(snap(x), o.out - 0.05);
+    else { o.out = Math.max(snap(x), o.in + 0.05); o.beats = Math.round((o.out - o.in) / P()); }
+    finish(o);
+    v.currentTime = mode === 'in' ? o.in : o.out; renderRange(); drawScrub();
+  };
+  const up = () => {
+    cv.removeEventListener('pointermove', mv); cv.removeEventListener('pointerup', up); cv.removeEventListener('pointercancel', up);
+    if (mode !== 'seek') { commit(before); renderAll(); }
+  };
+  try { cv.setPointerCapture(e.pointerId); } catch (err) { /* capture is optional */ }
+  mv(e);
+  cv.addEventListener('pointermove', mv); cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+});
+cv.addEventListener('mousemove', e => {
+  const c = clipInfo(cur), s = shotObj(); if (!c || !s || !usable()) return;
+  const r = cv.getBoundingClientRect(), px = tt => tt / c.duration * r.width + r.left;
+  cv.style.cursor = Math.abs(e.clientX - px(s.in)) < 9 || Math.abs(e.clientX - px(s.out)) < 9 ? 'ew-resize' : 'crosshair';
+});
+
+/* ---------- render: right ---------- */
+function renderInspector() {
+  const s = shotObj();
+  $('#insp').classList.toggle('off', !s);
+  $('#clipbox').classList.toggle('off', !cur);
+  $('#rtitle').textContent = sel >= 0 ? t('shotTitle', sel + 1) : t('newShot');
+  $('#rsub').textContent = s ? t(sel >= 0 ? 'shotSubSel' : 'shotSubNew', s.clip) : '';
+  if (s) {
+    $('#note').value = s.note || ''; $('#prof').value = s.prof;
+    $('#tin').value = s.tin || 'cut'; $('#tdur').value = s.tdur == null ? 0.5 : s.tdur;
+    $('#tdurwrap').style.display = (s.tin || 'cut') === 'cut' ? 'none' : '';
+  }
+  $('#add').style.display = sel >= 0 ? 'none' : '';
+  ['#dup', '#del', '#mvl', '#mvr'].forEach(id => { $(id).style.display = sel >= 0 ? '' : 'none'; });
+  $('#mvl').disabled = sel <= 0; $('#mvr').disabled = sel < 0 || sel >= S.shots.length - 1;
+  $('#mkbad').disabled = !s || !usable();
+  const bl = $('#badlist'); bl.replaceChildren();
+  (own(S.bad, cur, []) || []).forEach((b, i) => {
+    const d = el('div', 'bad-it'), badge = el('span', 'badge', fmt(b.a) + ' – ' + fmt(b.b));
+    badge.onclick = () => seekTo(b.a);
+    const inp = el('input'); inp.type = 'text'; inp.value = b.note || ''; inp.placeholder = t('badNotePh');
+    inp.onchange = () => mutate(() => { b.note = inp.value; });
+    const rm = el('button', '', '×'); rm.title = t('removeTip');
+    rm.onclick = () => mutate(() => { S.bad[cur].splice(i, 1); if (!S.bad[cur].length) delete S.bad[cur]; });
+    d.append(badge, inp, rm); bl.appendChild(d);
+  });
+}
+
+/* ---------- render: timeline ---------- */
+function renderTimeline() {
+  const box = $('#tlin'); box.replaceChildren();
+  const tb = S.shots.reduce((a, s) => a + s.beats, 0), total = T(tb) + (S.tail || 0);
+  let musicBeat = null;
+  if (MD != null && isFinite(MD)) musicBeat = (MD - (S.tail || 0) - S.t0) / P();
+  box.style.width = ((Math.max(tb, musicBeat || 0) + 12) * PXB) + 'px';
+  for (let k = 0; k <= tb + 11; k += 4) {
+    const tk = el('div', 'tick' + (k % 8 === 0 ? ' b' : '')); tk.style.left = k * PXB + 'px';
+    if (k % 8 === 0) tk.appendChild(el('span', '', fmtS(T(k))));
+    box.appendChild(tk);
+  }
+  let k = 0;
+  S.shots.forEach((s, i) => {
+    const sp = speedOf(s), b = el('div', 'blk' + (i === sel ? ' sel' : ''));
+    b.style.left = k * PXB + 'px'; b.style.width = Math.max(10, s.beats * PXB - 2) + 'px'; b.style.background = 'hsl(' + hue(s.prof) + ' 42% 62%)';
+    b.draggable = true;
+    b.title = (i + 1) + '. ' + s.clip + ' ' + fmt(s.in) + ' → ' + fmt(s.out) + '\n' + t('chip', s.beats, (s.beats * P()).toFixed(1), sp.toFixed(2)) + '\n' + (s.note || '');
+    b.appendChild(el('div', 't1', (i + 1) + ' · ' + s.clip));
+    b.appendChild(el('div', 't2', fmtS(s.in) + ' · ' + s.beats));
+    b.appendChild(el('div', 't2', s.note || ''));
+    if (Math.abs(sp - 1) > 0.015) b.appendChild(el('span', 'bd', 'x' + sp.toFixed(2)));
+    const rz = el('div', 'rz'); b.appendChild(rz);
+    b.onclick = () => pick(i);
+    b.ondragstart = e => { dragI = i; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', String(i)); } catch (err) { /* optional */ } };
+    b.ondragover = e => { e.preventDefault(); b.classList.add('drop'); };
+    b.ondragleave = () => b.classList.remove('drop');
+    b.ondrop = e => {
+      e.preventDefault(); b.classList.remove('drop');
+      if (dragI < 0 || dragI === i) return;
+      const from = dragI; dragI = -1;
+      mutate(() => { const [m] = S.shots.splice(from, 1); S.shots.splice(i, 0, m); sel = i; });
+    };
+    rz.onmousedown = e => {
+      e.preventDefault(); e.stopPropagation();
+      const before = snapStr(), x0 = e.clientX, b0 = s.beats;
+      const mv = ev => {
+        s.beats = clamp(b0 + Math.round((ev.clientX - x0) / PXB), 1, 512);
+        if (s.fit === 'cut') s.out = r2(s.in + s.beats * P());
+        renderTimeline(); if (i === sel) { renderRange(); drawScrub(); }
+      };
+      const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); commit(before); renderAll(); };
+      window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
+    };
+    rz.onclick = e => e.stopPropagation();
+    box.appendChild(b); k += s.beats;
+  });
+  const flag = (kk, txt, cls) => { const m = el('div', 'mk ' + (cls || '')); m.style.left = kk * PXB + 'px'; m.appendChild(el('span', '', txt)); box.appendChild(m); };
+  S.markers.forEach(m => flag(m.beat, String(m.title)));
+  const music = $('#music'); music.textContent = '';
+  if (musicBeat != null) {
+    flag(musicBeat, t('musicEnds'), 'end');
+    const over = total - MD;
+    music.textContent = ' · ' + (over > 0.1 ? t('musicOver', fmt(MD), over.toFixed(1)) : t('musicFree', fmt(MD), (-over).toFixed(1)));
+    music.className = over > 0.1 ? 'bad' : 'ok';
+  }
+  $('#totals').textContent = t('totals', S.shots.length, tb, fmt(total));
+  $('#used').textContent = ' · ' + t('clipsUsed', new Set(S.shots.map(s => s.clip)).size, CLIPS.length);
+}
+function renderTop() {
+  $('#period').value = S.period; $('#t0').value = S.t0; $('#tail').value = S.tail;
+  $('#bpm').textContent = t('bpm', (60 / S.period).toFixed(1));
+}
+function renderAll() {
+  if (!S) return;
+  renderTop(); renderClips(); renderRange(); renderInspector(); renderTimeline(); renderMsg(); updateTime(); drawScrub();
+}
+
+/* ---------- actions ---------- */
+function addShot() {
+  if (!draft || sel >= 0) return;
+  const s = JSON.parse(JSON.stringify(draft)); s.clip = cur;
+  mutate(() => { S.shots.push(s); sel = S.shots.length - 1; });
+}
+function markBad() {
+  const s = shotObj(); if (!s || !cur) return;
+  mutate(() => {
+    if (!Array.isArray(S.bad[cur])) S.bad[cur] = [];
+    S.bad[cur].push({a: r2(s.in), b: r2(Math.max(s.out, s.in + 0.5)), note: s.note || ''});
+  });
+}
+function previewRange() {
+  const s = shotObj(); if (!s || !usable()) return;
+  v.playbackRate = clamp(speedOf(s), 0.25, 4); seekTo(s.in); stopAt = s.out;
+  const p = v.play(); if (p && p.catch) p.catch(() => {});
+}
+function togglePlay() {
+  stopAt = null; v.playbackRate = rate;
+  if (v.paused) { const p = v.play(); if (p && p.catch) p.catch(() => {}); } else v.pause();
+}
+function step(d) { v.pause(); v.currentTime = Math.max(0, v.currentTime + (d === 'f' ? 1 / fps() : (d === '-f' ? -1 / fps() : d))); }
+function checkStop() {
+  if (stopAt == null || v.currentTime < stopAt) return;
+  const s = shotObj();
+  if ($('#loop').checked && s) v.currentTime = s.in;
+  else { v.pause(); stopAt = null; v.playbackRate = rate; }
+}
+function tick() { if (v.paused) return; checkStop(); updateTime(); drawScrub(); requestAnimationFrame(tick); }
+v.onplay = () => { setPlayLabel(); requestAnimationFrame(tick); };
+v.onpause = () => { setPlayLabel(); updateTime(); drawScrub(); };
+v.ontimeupdate = () => { updateTime(); drawScrub(); };
+v.onseeked = () => { updateTime(); drawScrub(); };
+
+$('#play').onclick = togglePlay;
+document.querySelectorAll('[data-step]').forEach(b => { b.onclick = () => { const d = b.dataset.step; step(d === 'f' || d === '-f' ? d : +d); }; });
+document.querySelectorAll('[data-rate]').forEach(b => {
+  b.onclick = () => { rate = +b.dataset.rate; v.playbackRate = rate; document.querySelectorAll('[data-rate]').forEach(x => x.classList.toggle('on', x === b)); };
+});
+$('#setin').onclick = () => setIn(v.currentTime);
+$('#setout').onclick = () => setOut(v.currentTime);
+function numField(input, apply) {
+  input.onchange = () => { const x = numVal(input); if (x === null) { renderAll(); return; } apply(x); };
+}
+numField($('#in'), x => setIn(x));
+numField($('#out'), x => setOut(x));
+numField($('#beats'), x => setBeats(x));
+$('#mfit').onclick = () => edit(s => { s.fit = 'fit'; });
+$('#mcut').onclick = () => edit(s => { s.fit = 'cut'; });
+$('#interp').onchange = e => edit(s => { if (e.target.value) s.interp = e.target.value; else delete s.interp; });
+$('#note').onchange = e => edit(s => { s.note = e.target.value; });
+$('#prof').onchange = e => edit(s => { s.prof = e.target.value; });
+$('#tin').onchange = e => edit(s => { s.tin = e.target.value; });
+numField($('#tdur'), x => edit(s => { s.tdur = r2(clamp(x, 0, 5)); }));
+$('#add').onclick = addShot; $('#mkbad').onclick = markBad; $('#prev').onclick = previewRange;
+$('#dup').onclick = () => { if (sel >= 0) mutate(() => { S.shots.splice(sel + 1, 0, JSON.parse(JSON.stringify(S.shots[sel]))); sel++; }); };
+$('#del').onclick = () => { if (sel >= 0) mutate(() => { S.shots.splice(sel, 1); sel = -1; draft = newDraft(); }); };
+function moveShot(d) {
+  const j = sel + d; if (sel < 0 || j < 0 || j >= S.shots.length) return;
+  mutate(() => { const [m] = S.shots.splice(sel, 1); S.shots.splice(j, 0, m); sel = j; });
+}
+$('#mvl').onclick = () => moveShot(-1); $('#mvr').onclick = () => moveShot(1);
+$('#cnote').onchange = e => mutate(() => { if (e.target.value) S.clipnotes[cur] = e.target.value; else delete S.clipnotes[cur]; });
+$('#q').oninput = renderClips;
+$('#undo').onclick = undo;
+$('#zoom').oninput = e => { PXB = +e.target.value; renderTimeline(); };
+numField($('#period'), x => { if (!(x > 0.05 && x < 10)) { renderAll(); return; } mutate(() => { S.period = x; S.shots.forEach(s => { if (s.fit === 'cut') s.out = r2(s.in + s.beats * x); }); }); });
+numField($('#t0'), x => { if (x < 0) { renderAll(); return; } mutate(() => { S.t0 = x; }); });
+numField($('#tail'), x => { if (x < 0 || x > 30) { renderAll(); return; } mutate(() => { S.tail = x; }); });
+
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if (b && e.detail > 0) b.blur(); });
+document.addEventListener('change', e => { const n = e.target; if (n.tagName === 'SELECT' || (n.tagName === 'INPUT' && (n.type === 'checkbox' || n.type === 'number'))) n.blur(); });
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase(), tag = e.target.tagName;
+  if (k === 'escape') {
+    if ($('#helpmodal').style.display === 'flex') { toggleHelp(false); return; }
+    if ($('#jobmodal').style.display === 'flex') { $('#jobmodal').style.display = 'none'; return; }
+  }
+  if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag) && e.target.type !== 'checkbox' && e.target.type !== 'range') return;
+  if (!S) return;
+  if ($('#helpmodal').style.display === 'flex') { if (k === '?') toggleHelp(false); return; }
+  if (e.ctrlKey || e.metaKey) { if (k === 'z' && !e.shiftKey) { undo(); e.preventDefault(); } return; }
+  if (k === '?') { toggleHelp(true); e.preventDefault(); }
+  else if (k === ' ') { togglePlay(); e.preventDefault(); }
+  else if (k === 'arrowleft') { step(e.shiftKey ? -5 : (e.altKey ? '-f' : -0.5)); e.preventDefault(); }
+  else if (k === 'arrowright') { step(e.shiftKey ? 5 : (e.altKey ? 'f' : 0.5)); e.preventDefault(); }
+  else if (k === ',') step('-f');
+  else if (k === '.') step('f');
+  else if (k === 'i') setIn(v.currentTime);
+  else if (k === 'o') setOut(v.currentTime);
+  else if (k === 'a' && sel < 0) addShot();
+  else if (k === 'x') markBad();
+  else if (k === 'p') previewRange();
+  else if (k === '[' || k === ']' || k === 'arrowup' || k === 'arrowdown') {
+    const i = CLIPS.findIndex(c => c.name === cur) + (k === ']' || k === 'arrowdown' ? 1 : -1);
+    if (CLIPS[i]) selectClip(CLIPS[i].name);
+    e.preventDefault();
+  }
+  else if (k === 'delete' && sel >= 0) $('#del').click();
+  else if (k === 'escape') { sel = -1; draft = newDraft(); renderAll(); }
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden && dirty && S) flushSave(); });
+window.addEventListener('beforeunload', e => { if (dirty && !blockSave) { e.preventDefault(); e.returnValue = ''; } });
+window.addEventListener('resize', drawScrub);
+load();
+</script>
+</body>
+</html>

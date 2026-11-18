@@ -1,0 +1,23 @@
+{
+ "clips_dir": "..",
+ "extensions": [
+  ".mp4",
+  ".mov",
+  ".mxf"
+ ],
+ "exclude_prefix": [],
+ "music": "our_expanse.mp3",
+ "fps": "30000/1001",
+ "draft": {
+  "width": 1280,
+  "height": 720
+ },
+ "final": {
+  "width": 1920,
+  "height": 1080
+ },
+ "fill": "cover",
+ "encoder": "auto",
+ "loudness": -15.0,
+ "profiles": {}
+}
